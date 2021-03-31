@@ -1,10 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const conn = require('../util/sql.js');
+const multer = require('multer');
 const cors = require('cors');
 router.use(cors());
 router.use(express.urlencoded());
 
+// 精细化去设置，如何去保存文件
+const storage = multer.diskStorage({
+    // 保存在哪里
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
+    },
+    // 保存时，文件名叫什么
+    filename: function (req, file, cb) {
+        console.log('file', file)
+        // 目标： 新名字是时间戳+后缀名
+        const filenameArr = file.originalname.split('.');
+        // filenameArr.length-1是找到最后一个元素的下标
+        const fileName = Date.now() + "." + filenameArr[filenameArr.length - 1]
+        cb(null, fileName) //
+    }
+})
+
+const upload = multer({ storage });
 // 获取个人信息
 router.get('/userinfo', (req, res) => {
     const { userName } = req.query;
@@ -35,13 +54,18 @@ router.post('/userinfo', (req, res) => {
 })
 
 // 上传用户头像
-router.post('/uploadPic', (req, res) => {
-    res.send('上传用户头像');
+router.post('/uploadPic', upload.single('file_data'), (req, res) => {
+    // res.send(req.file);
+    res.json({
+        "status": 0,
+        "src": "http://127.0.0.1:3000/uploads/" + req.file.filename
+    })
 })
 
 // 重置密码
 router.post('/updatepwd', (req, res) => {
-    res.send('上传用户头像');
+    const { id, oldPwd, newPwd } = req.body;
+    res.send('重置密码');
 })
 
 module.exports = router;
