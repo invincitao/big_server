@@ -30,7 +30,14 @@ server.use('/api', userRouter);
 server.use('/my', accountRouter);
 server.use('/my/article', cateRouter);
 
-
+// 错误处理中间件用来检查token合法性
+server.use((err, req, res, next) => {
+    console.log('有错误', err)
+    if (err.name === 'UnauthorizedError') {
+        // res.status(401).send('invalid token...');
+        res.status(401).send({ code: 1, message: '身份认证失败！' });
+    }
+});
 server.listen(3000, () => {
     console.log('3000端口准备就绪');
 })
