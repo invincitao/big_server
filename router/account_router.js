@@ -65,7 +65,20 @@ router.post('/uploadPic', upload.single('file_data'), (req, res) => {
 // 重置密码
 router.post('/updatepwd', (req, res) => {
     const { id, oldPwd, newPwd } = req.body;
-    res.send('重置密码');
+    // 先要判断输入的旧密码
+    const sqlOld = `select password from users where id=${id}`;
+    conn.query(sqlOld, (err, results) => {
+        if (err) return res.json({ "status": 500, "message": "服务器错误" });
+        if (results[0].password != oldPwd) return res.json({ "status": 1, "message": "旧密码错误" });
+        // console.log(result[0]);
+        const sqlNew = `update users set password="${newPwd}" where id=${id}`;
+        conn.query(sqlNew, (err, result) => {
+            // console.log(results[0].password);
+            if (err) return res.json({ "status": 500, "message": "服务器错误" });
+            if (results[0].password == newPwd) return res.json({ "status": 1, "message": "输入的密码与旧密码一样" });
+            res.json({ "status": 0, "message": "修改密码成功" });
+        })
+    })
 })
 
 module.exports = router;
