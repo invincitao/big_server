@@ -27,6 +27,7 @@ router.post('/register', (req, res) => {
 // 登录接口
 router.post('/login', (req, res) => {
     const { userName, userPwd } = req.body;
+    console.log(req.use);
     const sqlLogin = `select * from users where username="${userName}" and password="${userPwd}"`;
     conn.query(sqlLogin, (err, result) => {
         if (err) return res.json({ "status": 1, "message": "服务器错误" });
@@ -34,7 +35,7 @@ router.post('/login', (req, res) => {
             // 登陆成功带token
             const tokenStr = jwt.sign({ name: userName }, 'gz61', { expiresIn: 7200 });
             const token = 'Bearer ' + tokenStr
-            return res.json({ "status": 0, "message": "登录成功", token });
+            return res.json({ "status": 0, "message": "登录成功！", token });
         } else {
             return res.json({ "status": 1, "message": "登录失败,登陆失败，用户名密码不对" });
         }
